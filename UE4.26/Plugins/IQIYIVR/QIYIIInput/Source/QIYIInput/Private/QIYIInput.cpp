@@ -465,6 +465,28 @@ namespace QIYIInput
 	ETrackingStatus FQIYIInput::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
 	{
 		ETrackingStatus TrackingStatus = ETrackingStatus::NotTracked;
+		
+		if (DeviceHand != EControllerHand::Left && DeviceHand != EControllerHand::Right)
+		{
+			return TrackingStatus;
+		}
+
+		// Returning Tracked here until bIsConnected and other getters are implemented
+		return ETrackingStatus::Tracked;
+
+		// Later we can use this to detect tracking status
+		for (const FQIYITouchControllerPair& ControllerPair : ControllerPairs)
+		{
+			if (ControllerPair.UnrealControllerIndex == ControllerIndex)
+			{
+				const FQIYITouchControllerState& ControllerState = ControllerPair.ControllerStates[(int32)DeviceHand];
+				if (ControllerState.bIsConnected)
+				{
+					TrackingStatus = ETrackingStatus::Tracked;
+					break;
+				}
+			}
+		}
 
 		return TrackingStatus;
 	}
