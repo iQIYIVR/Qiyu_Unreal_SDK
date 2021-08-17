@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--QIYIVR plugin additions-->
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- init section is always evaluated once per architecture -->
+	<init>
+    <trace enable="true"/>  <!--  for debugging script -->
+		<log text="QIYIVRHMD init"/>
+		<!-- currently support arm 32 and 64 bit -->
+		<setBool result="bSupported" value="false"/>
+    <isArch arch="armeabi-v7a">
+      <setBool result="bSupported" value="true"/>
+    </isArch>
+    <isArch arch="arm64-v8a">
+      <setBool result="bSupported" value="true"/>
+    </isArch>
+  </init>
+
+	<!-- optional updates applied to AndroidManifest.xml 
+	<androidManifestUpdates>
+        <addPermission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+	</androidManifestUpdates>
+  -->
+  
+	<!-- optional additions to proguard -->
+	<proguardAdditions>
+	</proguardAdditions>
+
+	<!-- optional files or directories to copy to Intermediate/Android/APK -->
+  <resourceCopies>
+    <log text="Copying QIYI libraries" />
+    <isArch arch="armeabi-v7a">
+      <log text="Copying QIYI XR 32bit runtime files to staging" />
+      <copyFile src="$S(PluginDir)/../../../QIYIVRLib/Libs/Android/armeabi-v7a/libsxrapi.so"
+                dst="$S(BuildDir)/libs/armeabi-v7a/libsxrapi.so" />
+    </isArch>
+    
+    <isArch arch="arm64-v8a">
+      <log text="Copying libsxrapi 64bit runtime files to staging" />
+      <copyFile src="$S(PluginDir)/../../../QIYIVRLib/Libs/Android/arm64-v8a/libsxrapi.so"
+                dst="$S(BuildDir)/libs/arm64-v8a/libsxrapi.so" />
+    </isArch>
+
+    <log text="Copying QIYI sxrApi.jar" />
+    <copyFile src="$S(PluginDir)/../../../QIYIVRLib/Libs/Android/sxrApi.jar"
+              dst="$S(BuildDir)/libs/sxrApi.jar" />
+
+    <!--   -->
+<isArch arch="arm64-v8a">
+  <log text="Copying libashreader 64bit runtime files to staging" />
+  <copyFile src="$S(PluginDir)/../../../QIYIVRLib/Libs/Android/arm64-v8a/libashreader.so"
+            dst="$S(BuildDir)/libs/arm64-v8a/libashreader.so" />
+</isArch>
+
+<isArch arch="arm64-v8a">
+  <log text="Copying libqiyivrsdkcore 64bit runtime files to staging" />
+  <copyFile src="$S(PluginDir)/../../../QIYIVRLib/Libs/Android/arm64-v8a/libqiyivrsdkcore.so"
+            dst="$S(BuildDir)/libs/arm64-v8a/libqiyivrsdkcore.so" />
+</isArch>
+
+<log text="Copying QIYI qiyivrsdkcore.jar" />
+<copyFile src="$S(PluginDir)/../../../QIYIVRLib/Libs/Android/qiyivrsdkcore.jar"
+          dst="$S(BuildDir)/libs/qiyivrsdkcore.jar" />
+
+
+<!-- Webhelper stuff 					
+      <copyFile src="$S(EngineDir)/Source/ThirdParty/Qualcomm/LibSvrApi/Libs/Android/WebHelper.jar"
+					  dst="$S(BuildDir)/libs/WebHelper.jar" />
+	  -->
+  </resourceCopies>
+
+	<!-- optional additions to the GameActivity imports in GameActivity.java
+	<gameActivityImportAdditions>
+	</gameActivityImportAdditions>
+	-->
+
+	<!-- optional additions to the GameActivity class in GameActivity.java -->
+	<gameActivityClassAdditions>
+		<insert>
+	/** Whether this application was packaged for QIYIVR or not */
+	public boolean PackagedForQIYIVR = true;
+
+	// check the manifest to determine if we are a QIYI application
+	public boolean AndroidThunkJava_IsSVRApplication()
+	{
+		return PackagedForQIYIVR;
+	}
+    public boolean AndroidThunkJava_IsOculusMobileApplication()
+    {
+        return true;
+    }        
+		</insert>
+	</gameActivityClassAdditions>
+
+	<!-- optional additions to GameActivity onCreate metadata reading in GameActivity.java
+	<gameActivityReadMetadataAdditions>
+	</gameActivityReadMetadataAdditions>
+    -->
+
+	<!-- optional additions to GameActivity onCreate in GameActivity.java
+	<gameActivityOnCreateAdditions>
+	</gameActivityOnCreateAdditions>
+	-->
+
+	<!-- optional additions to GameActivity onDestroy in GameActivity.java
+	<gameActivityOnDestroyAdditions>
+	</gameActivityOnDestroyAdditions>
+	-->
+
+	<!-- optional additions to GameActivity onStart in GameActivity.java
+	<gameActivityOnStartAdditions>
+	</gameActivityOnStartAdditions>
+	-->
+
+	<!-- optional additions to GameActivity onStop in GameActivity.java
+	<gameActivityOnStopAdditions>
+	</gameActivityOnStopAdditions>
+	-->
+
+	<!-- optional additions to GameActivity onPause in GameActivity.java
+	<gameActivityOnPauseAdditions>
+	</gameActivityOnPauseAdditions>
+	-->
+
+	<!-- optional additions to GameActivity onResume in GameActivity.java
+	<gameActivityOnResumeAdditions>
+	</gameActivityOnResumeAdditions>
+	-->
+
+	<!-- optional additions to GameActivity onActivityResult in GameActivity.java
+	<gameActivityOnActivityResultAdditions>
+	</gameActivityOnActivityResultAdditions>
+	-->
+
+	<!-- optional libraries to load in GameActivity.java before libUE4.so -->
+	<soLoadLibrary>
+		<!-- need this if plugin enabled and supported architecture, even if not packaged for QIYIVR -->
+		<if condition="bSupported">
+			<true>
+				<loadLibrary name="sxrapi" failmsg="sxrapi library not loaded and required!" />
+			</true>
+		</if>
+	</soLoadLibrary>
+
+  <!-- need this if plugin enabled and supported architecture, even if not packaged for QIYIVR -->
+<soLoadLibrary>
+  <if condition="bSupported">
+    <true>
+      <loadLibrary name="qiyivrsdkcore" failmsg="qiyivrsdkcore library not loaded and required!" />
+    </true>
+  </if>
+</soLoadLibrary>
+
+  <proguardAdditions>
+    <insert>
+      -keep class com.qiyi.** { *; }
+      -keep class com.qualcomm.** { *; }
+    </insert>
+  </proguardAdditions>
+
+  <androidManifestUpdates>
+    <setElement result="metaData" value="meta-data"/>
+    <addAttribute tag="$metaData" name="android:name" value="unreal-sdk-version"/>
+    <addAttribute tag="$metaData" name="android:value" value="1.0.0"/>
+    <addElement tag="application" name="metaData"/>
+
+  </androidManifestUpdates>
+
+
+</root>
